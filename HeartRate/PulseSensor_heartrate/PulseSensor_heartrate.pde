@@ -51,7 +51,7 @@ void setup() {
 /*  
 //....................OOCSI RECIEVER CLIENT ...................................//
 
-bpmReciever.connect("localhost", 4444);
+bpmReciever.connect(nl.tue.id.oosci", 4500);
 bpmReciever.subscribe("heartRateModule", new EventHandler(){
         public void receive(OOCSIEvent event) {
             //get labeledBPM with key BPMval
@@ -68,10 +68,10 @@ bpmReciever.subscribe("heartRateModule", new EventHandler(){
 });
 */
 //....................OOCSI SENDER CONNECTION...................................//
-bpmSender.connect("localhost",4444);
+bpmSender.connect("nl.tue.id.oosci",4500);
  // connect to OOCSI server 
  // with "heartRate" as my channel others can send data to 
-   oocsi = new OOCSI(this,"heartRateModule","localhost");
+   oocsi = new OOCSI(this,"heartRateModule","nl.tue.id.oosci");
 
 //....................ARDUINO CONNECTION..........................................//
   println(Serial.list());    // print a list of available serial ports
@@ -150,7 +150,7 @@ public void handleOOCSIEvent(OOCSIEvent event) {
   
 
 //Assigning correct tags to BPM values for each module/group
- if(BPM == 50) {
+ if(BPM <= 50) {
    pizza = lowBPM.get(0); 
    caffee = lowBPM.get(1);
  // clock = lowBPM.get(2); 
