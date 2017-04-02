@@ -69,8 +69,9 @@ Note : We cannot diffrentiate between the people scanning their finger since the
 ### Important 
 
 The snippet given above is not the only way to recieve data. Here is some important information :
-Channel Name : heartRateModule
-Sender Client : bpmSender
+
+#### Channel Name : heartRateModule
+#### Sender Client : bpmSender
 
 ```
 OOCSI oocsi;
