@@ -1,6 +1,6 @@
 //Get values from Arduino in a suitable form
 //NOT OF IMPORTANCE TO OTHER GROUPS 
-
+/*
 void serialEvent(Serial port){ 
    String inData = port.readStringUntil('\n');
    inData = trim(inData);                 // cut off white space (carriage return)
@@ -17,3 +17,4 @@ void serialEvent(Serial port){
    }
  
 }
+*/

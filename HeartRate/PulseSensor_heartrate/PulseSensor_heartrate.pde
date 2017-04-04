@@ -7,25 +7,16 @@ Manisha , Daan , Pleun , Stijn
 
 
 import nl.tue.id.oocsi.*;
-import nl.tue.id.oocsi.client.*;
-import nl.tue.id.oocsi.client.behavior.*;
-import nl.tue.id.oocsi.client.behavior.state.*;
-import nl.tue.id.oocsi.client.data.*;
-import nl.tue.id.oocsi.client.protocol.*;
-import nl.tue.id.oocsi.client.services.*;
-import nl.tue.id.oocsi.client.socket.*;
-import nl.tue.id.oocsi.OOCSIEvent;
- 
-
 import java.util.ArrayList;
-import processing.serial.*; //TALK WITH ARDUINO
+//import processing.serial.*; //TALK WITH ARDUINO
 
 int Sensor;      // HOLDS PULSE SENSOR DATA FROM ARDUINO
-int BPM;         // HOLDS HEART RATE VALUE FROM ARDUINO
+int BPM = 50;         // HOLDS HEART RATE VALUE FROM ARDUINO
 boolean beat=false;
 PFont font; //FONT STYLE FOR SKETCHES
-Serial port;    
-
+//Serial port;   
+int port = 4545;
+String currentActivity;
 String BPMval;
 String labeledBPM;
 String pizzaTags; //key for pizza tags
@@ -35,12 +26,10 @@ String pizza;
 String caffee;
 String clock;
 OOCSI oocsi;
-OOCSIClient bpmSender = new OOCSIClient("bpmSender");
-//OOCSIClient bpmReciever = new OOCSIClient("bpmReciever");
 
 void setup() {
 //....................FREUQNECY OF HOW OFTEN DATA IS SENT.....................//
-   frameRate(0.1); 
+   frameRate(1); 
    
 //....................SKETCH SETUP............................................//
   size(400,200); 
@@ -48,47 +37,37 @@ void setup() {
   font = loadFont("Arial-BoldMT-24.vlw");
   textFont(font);
   textAlign(CENTER);  
-/*  
-//....................OOCSI RECIEVER CLIENT ...................................//
+  
 
-bpmReciever.connect(nl.tue.id.oosci", 4500);
-bpmReciever.subscribe("heartRateModule", new EventHandler(){
-        public void receive(OOCSIEvent event) {
-            //get labeledBPM with key BPMval
-                //if(beat==false) {
-                  //System.out.print("No heart beat");
-                  //}   
-                  System.out.println(event.getString("BPMval",labeledBPM));
-      
-                  //Please only use line that relates to your group
-                      System.out.println(event.getString("pizzaTags",pizza));
-                     //System.out.println(event.getString("caffeeTags","caffee"));
-                     //System.out.println(event.getString("clockTags","clock"));
-   }
-});
-*/
+
 //....................OOCSI SENDER CONNECTION...................................//
-bpmSender.connect("nl.tue.id.oosci",4500);
- // connect to OOCSI server 
- // with "heartRate" as my channel others can send data to 
-   oocsi = new OOCSI(this,"heartRateModule","nl.tue.id.oosci");
-
+   oocsi = new OOCSI(this,"heartRateModule","oocsi.id.tue.nl");
+   oocsi.subscribe("SmartClock");
+/*
 //....................ARDUINO CONNECTION..........................................//
   println(Serial.list());    // print a list of available serial ports
   // choose the number between the [] that is connected to the Ardui9no
   port = new Serial(this, Serial.list()[0], 115200);  // make sure Arduino is talking serial at this baud rate
   port.clear();            // flush buffer
   port.bufferUntil('\n');  // set buffer full flag on receipt of carriage return
- 
+ */
+}
+
+public void SmartClock(OOCSIEvent event){
+  
+  currentActivity = event.getString("currentActivity");
+  System.out.println("currentActivity");
 }
 
 
-
 //....................SEND TO OOCSI.........................................//
+
 //.............USE RELEVANT KEY FOR YOUR MODULE.............................//
 
 void draw() {
-  new OOCSIMessage(bpmSender,"heartRateModule")
+  /*
+  oocsi
+  .channel("heartRateModule")
   //We send data through channel heartRateModule via client bpmSender
   // data sent is BPM values(recommened for each group)
   .data("BPMval",labeledBPM)
@@ -100,11 +79,17 @@ void draw() {
          .data("clockTags",clock)
          //send this data via OOCSI
            .send();  
+  */
   
+oocsi
+  .channel("SmartClock")
+        .data("currentActivity", "retrieve")
+          .data("returnChannel","heartRateModule")
+            .send();
 }
 
 
-
+/*
 //............BEAT IS AN INACCURATE VALUE......................................//
 boolean beatError(boolean beat, int maxBeat, int minBeat){
   //maxBeat and minBeat are set to so system gives error message
@@ -127,10 +112,12 @@ boolean beatError(boolean beat, int maxBeat, int minBeat){
 For all Modules : we try to send out personalized tags.If you want your tags changed or, 
 wish to be added,please contact a member of Group 1, TFC.
 */
-
+/*
 //.........MAIN : assign correct values to tags and BPM.....................//
 
 public void handleOOCSIEvent(OOCSIEvent event) {
+    System.out.print(event.getString("pizzaTags").equals("test"));
+          
  //setup of sketch
   background(0);
   noStroke(); 
@@ -150,7 +137,7 @@ public void handleOOCSIEvent(OOCSIEvent event) {
   
 
 //Assigning correct tags to BPM values for each module/group
- if(BPM <= 50) {
+ if(BPM == 50) {
    pizza = lowBPM.get(0); 
    caffee = lowBPM.get(1);
  // clock = lowBPM.get(2); 
@@ -172,3 +159,4 @@ public void handleOOCSIEvent(OOCSIEvent event) {
   text(pizza,150,75);
 
 }  //end of main loop
+*/
