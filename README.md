@@ -15,51 +15,37 @@ User must have library OOCSI downloaded. We send direct messages so please have 
 
 
 ```
-int port;
-OOCSIClient bpmReciever = new OOCSIClient("bpmReciever");
 
-bpmReciever.connect("ws://oocsi.id.tue.nl/", port);
-bpmReciever.subscribe("heartRateModule", new EventHandler(){
-        public void receive(OOCSIEvent event) {
-            //get labeledBPM with key BPMval
-                  //if(beat==false) {
-                  //System.out.print("No heart beat");
-                  //}   
-                  System.out.println(event.getString("BPMval",labeledBPM));
-      
-                  //Please only use line that relates to your group
-                      System.out.println(event.getString("pizzaTags",pizza));
-                     //System.out.println(event.getString("caffeeTags","caffee"));
-                     //System.out.println(event.getString("clockTags","clock"));
-   }
-});
-
+oocsi.subscribe("HeartRateModule");
+int bpm = event.getInt("BPM", 0);
+String bpm_range = event.getString("BPMrange");
+String mood = event.getString("mood");
 ```
 
 Below is  snippet of how we send our data to OOCSI. 
 
+####Coffee Group (Sending Messages)
 ```
 
-//....................SEND TO OOCSI.........................................//
-//.............USE RELEVANT KEY FOR YOUR MODULE.............................//
-
-void draw() {
-  new OOCSIMessage(bpmSender,"heartRateModule")
-  //We send data through channel heartRateModule via client bpmSender
-  // data sent is BPM values(recommened for each group)
-  .data("BPMval",labeledBPM)
-    //data sent is tags for pizza group
-      .data("pizzaTags",pizza)
-      //data sent is tags for caffee group
-       .data("caffeeTags",caffee)
-       //data sent is tags for clock group
-         .data("clockTags",clock)
-         //send this data via OOCSI
-           .send();  
-  
-}
-
+ oocsi
+  .channel("coffee_channel")
+   //.data("BPMval",BPM)
+       .data("range",BPMrange)
+         .send();
+         
 ```
+####SmartCLock Group (Sending Messages)
+```
+oocsi
+  .channel("SmartClock")
+        .data("currentActivity", "retrieve")
+          .data("returnChannel","HeartRateModule")
+            .data("BPMval",BPM)
+              .data("mood",mood)
+            .send();
+```
+####X Group 
+
 
 
 To recieve the heart rate of  user, the user must keep their finger on the heart rate sensor. 
@@ -75,13 +61,9 @@ The snippet given above is not the only way to recieve data. Here is some import
 
 ```
 OOCSI oocsi;
-OOCSIClient bpmSender = new OOCSIClient("bpmSender");
-
-//....................OOCSI SENDER CONNECTION...................................//
-bpmSender.connect("ws://oocsi.id.tue.nl/",4444);
- // connect to OOCSI server 
- // with "heartRate" as my channel others can send data to 
-   oocsi = new OOCSI(this,"heartRateModule","ws://oocsi.id.tue.nl/");
+ oocsi = new OOCSI(this,"manisha","oocsi.id.tue.nl");
+ oocsi.subscribe("SmartClock");
+ oocsi.subscribe("coffee_channel");
 ```
 
 ## MODULE CONCEPT
