@@ -71,12 +71,12 @@ The module does not constantly sent heartbeat data. It makes more sense of data 
 Following are some Input (BPM) related to some more useful ranges per topic. Also the relevance in our opinion to other groups is mapped.
 
 ### Tags
-|Input: BPM value | Output: Range | Output: Moods |
-|0 < BPM <= 30 | extremelylow | Alert: BPM is too low |
-|30 < BPM <= 70 | low | Sad/Sleep |
-|70 < BPM <= 90 | normal | Neutral |
-|90 < BPM <= 120 | high | Happy |
-| BPM <= 120 | extremelyhigh | Excited | 
+|Input: BPM value | Output: Range | Output: Moods   |
+|0 < BPM <= 30 | extremelylow | Alert: BPM is too low   |
+|30 < BPM <= 70   | low | Sad/Sleep   |
+|70 < BPM <= 90   | normal | Neutral  |
+|90 < BPM <= 120   | high | Happy |
+| BPM <= 120   | extremelyhigh | Excited  | 
 
 # DBSU10
 Technologies for Connectivity 
