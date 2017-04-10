@@ -72,6 +72,7 @@ Following are some Input (BPM) related to some more useful ranges per topic. Als
 
 ### Tags
 |Input: BPM value | Output: Range | Output: Moods   |
+|------| ------|------ |
 |0 < BPM <= 30 | extremelylow | Alert: BPM is too low   |
 |30 < BPM <= 70   | low | Sad/Sleep   |
 |70 < BPM <= 90   | normal | Neutral  |
