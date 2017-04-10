@@ -13,21 +13,15 @@ import processing.serial.*; //TALK WITH ARDUINO
 
 int Sensor;      // HOLDS PULSE SENSOR DATA FROM ARDUINO
 int BPM;         // HOLDS HEART RATE VALUE FROM ARDUINO
-boolean beat=false;
+boolean beat = false;
+boolean caffee_order_record = false;
 PFont font; //FONT STYLE FOR SKETCHES
 Serial port;   
 String currentActivity;
-String BPMval;
-String labeledBPM;
-String pizzaTags; //key for pizza tags
-String caffeeTags; //key for caffee tags
-String clockTags; //key for clock group tags
-String pizza;  
-String caffee;
-String clock;
+int caffee_order;
 int output_type;
 String mood;
-
+String order_pizza;
 String BPMrange;
 OOCSI oocsi;
 
@@ -43,9 +37,10 @@ void setup() {
   textAlign(CENTER);  
 
 //....................OOCSI SENDER CONnECTION...................................//
-   oocsi = new OOCSI(this,"manisha786wegtwt68757","oocsi.id.tue.nl");
+   oocsi = new OOCSI(this,"manisha123","oocsi.id.tue.nl");
    oocsi.subscribe("SmartClock");
    oocsi.subscribe("coffee_channel");
+   oocsi.subscribe("choosePizza", "responseEvent");   
 
 //....................ARDUINO CONNECTION..........................................//
   println(Serial.list());    // print a list of available serial ports
@@ -55,137 +50,155 @@ void setup() {
   port.bufferUntil('\n');  // set buffer full flag on receipt of carriage return
  
  
- //GROUPING BPM ACCORDING TO THE RANGE
+ //GROUPING BPM ACCORDING TO THE RANGE 
  //NORMAL BPM IS 70-90
+ if(beat == true){
+   
  if(BPM > 70 && BPM <=90){
     BPMrange = "normal";
- }
- else {
-   //LOW BPM IS 30-70
-    if(BPM > 30 && BPM <=70){
+      }
+  //LOW BPM IS 30-70 
+ else if(BPM > 30 && BPM <=70){   
       BPMrange = "low";
-   }
-   else {
-       //EXTREME LOW BPM IS 0-30
-      if(BPM > 0 && BPM <=30){
+      }
+  //EXTREME LOW BPM IS 0-30
+ else if(BPM > 0 && BPM <=30){
        BPMrange = "extremelylow";
-     }
-     else {
-        //HIGH IS 90-120
-       if(BPM < 90 && BPM <=120){
+       }
+ else if(BPM < 90 && BPM <=120){
+  //HIGH IS 90-120
         BPMrange = "high";
        }
-       else {
-        //EXTREMELY HIGH IS MORE THAN 120 
-       if(BPM < 120){
+else if(BPM < 120) {
+  //EXTREMELY HIGH IS MORE THAN 120 
         BPMrange = "extremelyhigh";
-       }
-       }
-     } 
-   }
+       }     
+    }     
+ else{
+   //IF BEAT==FALSE
+   BPMrange = "Out of order";
  }
-}
-//Testing whether BPMrange functions correctly
  
+ //SETTING MOODS ACCORDING TO BPM
+ if(BPMrange.equals("low")){
+   mood = "Sad/Sleep";
+ } else if(BPMrange.equals("extremelylow")){
+   mood = "Alert: BPM is too low";
+ } else if(BPMrange.equals("high")) {
+   mood = "Happy";
+ } else if(BPMrange.equals("extremelyhigh")) {
+   mood = "Excited";
+ } else if(BPMrange.equals("normal")){
+   mood = "Neutral";
+ }
+ else{
+   mood = "Error";
+      }
+}
+ 
+
+
 void handleOOCSIEvent(OOCSIEvent event) {
   
-  //SEND BPMrange to COFFEE group
-  oocsi
-  .channel("coffee_channel")
-   //.data("BPMval",BPM)
-       .data("range",BPMrange)
-         .send();
-  
-  //CHECK FOR COFFEE ORDER
-  int caffee_order = event.getInt("output_type", 0);
-  if(beat == true){
-  if(caffee_order == 1 && (BPMrange.equals("low") || BPMrange.equals("normal"))) {
-    //int caffee_time_to_wait = event.getInt("caffee_time_to_wait", 0);
-    //play coffee playlist       
-      mood= "Chill";
-     if(caffee_order == 4) {
-    //int caffee_time_to_wait = event.getInt("caffee_time_to_wait", 0);
-    //play coffee ready playlist       
-    }
-  }
-  if(caffee_order == 1 && ( BPMrange.equals("normal") || BPMrange.equals("high"))) {
-    //int caffee_time_to_wait = event.getInt("caffee_time_to_wait", 0);
-    //play coffee playlist      
-     if(caffee_order == 4) {
-    //int caffee_time_to_wait = event.getInt("caffee_time_to_wait", 0);
-    //play coffee ready playlist       
-    }
-     mood= "Focus";
-  }  
+  /*
+  CHECK FOR COFFEE ORDER 
+  Coffee + BPM range helps define whether user is stressed/studying or chilling  
+  */
+  if(beat == true) {
+     
+  //GET COFFEE STATUS 
+  caffee_order = event.getInt("output_type", 0);
    
-  //SET MOODS FOR SMARTCLOCK ACTIVITY
- if(caffee_order == 4 && BPMrange.equals("extremelyhigh")){
-   mood= "Stressed";
+    if(caffee_order_record == true){
+    
+        if(caffee_order == 1 && (BPMrange.equals("low") || BPMrange.equals("normal"))) {
+        //play coffee playlist       
+         
+        } 
+        else if(caffee_order == 1 && ( BPMrange.equals("high"))){   
+             if(caffee_order == 4) {
+             //play coffee is ready music       
+               }
+        }
+       
+        else if(caffee_order == 4 && BPMrange.equals("extremelyhigh")){
+             
+                //play coffeeStress playlist 
+        } 
+        
+        else if(caffee_order == 4 && BPMrange.equals("low")){  
+                   //play coffeeCalm playlist  
+           } 
+   }  
  }
- if(caffee_order == 4 && BPMrange.equals("low")){
-   mood = "Calm";
- }
- if(BPMrange.equals("low")){
-   mood = "Sad";
- }
- if(BPMrange.equals("extremelylow")){
-   mood = "Alert: BPM is too low";
- }
- if(BPMrange.equals("high")) /*soemthing*/{
-   mood = "Happy";
- }
- if(BPMrange.equals("extremelyhigh")) /*soemthing*/{
-   mood = "Excited";
- }
-  }
-  //beat == false or malfunctioning
-  else {
-    if(caffee_order == 1){
-      mood = "coffee";
-    }
-    else {
-      mood = "no mood detected";
-    }
-  }  
-
- 
+  
+ else {  
+   
+  //GET ACTIVITY STRING 
+   
  //REQUEST ACTIVITY AND SEND MOODS TO SMARTCLOCK 
 oocsi
   .channel("SmartClock")
         .data("currentActivity", "retrieve")
           .data("returnChannel","HeartRateModule")
-            .data("BPMval",BPM)
+            .data("range",BPMrange)
               .data("mood",mood)
             .send();
 
-  //GET ACTIVITY STRING AND PLAY MUSIC
-  currentActivity = event.getObject("currentActivity").toString(); 
-  if(beat == false){
-  while(currentActivity.equals("")){    
-   //play music
-    }
-  while(currentActivity.equals("")){    
-   //play music
-    }
-  while(currentActivity.equals("")){    
-   //play music
-    }
-  }
-  if(beat == true) {
-    if(currentActivity != null){
-      //play music based on current activity
-  }
-  else{
-    //play music according to BPM
-  
-  }
+  currentActivity = event.getObject("currentActivity").toString();
+   
+     if(currentActivity != null){
+        while(currentActivity.equals("")){    
+         //play music
+          }
+        while(currentActivity.equals("")){    
+         //play music
+          }
+        while(currentActivity.equals("")){    
+         //play music
+          }
+      }
+      else {
+           if(mood.equals("Sad/Sleep")){
+            
+           } else if(mood.equals("Alert: BPM is too low")){
+             //error message
+           } else if(mood.equals("Happy")) {
+           } else if(mood.equals("Excited")) {
+           } else if(BPMrange.equals("Neutral")){
+           }
+      }  
 }
+  
+  //SEND BPMrange to COFFEE group
+  oocsi
+  .channel("coffee_channel")
+       .data("range",BPMrange)
+         .send();
+         
+ //GET PIZZA RESPONSE AND SEND MOOD TO PIIZA GROUP
+ oocsi
+  .channel("choosePizza")
+       .data("range",BPMrange)
+         .data("mood",mood)
+           .send();
+   
+  order_pizza = event.getString("response");
+  
+  if(order_pizza == "The button has been pressed."){
+    //play pizza ordered music to confirm order
+  }
+  
 }
 
 void draw(){
-  while (beat == true){
-  println(BPM);
-}
+  if(beat == true) {
+     println(mood);
+     println(BPMrange);     
+  }
+  else {
+    println("No heartbeat detected");
+  }
 }
 
 //............BEAT IS AN INACCURATE VALUE......................................//
@@ -200,9 +213,21 @@ boolean beatError(boolean beat, int maxBeat, int minBeat){
   }
  if(BPM > maxBeat) {
    beat = false;
-  }
-  
+  }  
  return beat;
+}
+
+boolean coffeeError(boolean caffee_order_record){
+  //maxBeat and minBeat are set to so system gives error message
+ caffee_order_record = false;
+ 
+ for(int i = 0; i < 5; i++){
+   if(caffee_order == i){
+     caffee_order_record = true;
+   }
+ }
+  
+ return caffee_order_record;
 }
 
   
